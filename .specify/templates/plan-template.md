@@ -1,4 +1,3 @@
-
 # Implementation Plan: [FEATURE]
 
 **Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
@@ -8,20 +7,19 @@
 ```
 1. Load feature spec from Input path
    → If not found: ERROR "No feature spec at {path}"
-2. Fill Technical Context (scan for NEEDS CLARIFICATION)
-   → Detect Project Type from file system structure or context (web=frontend+backend, mobile=app+api)
-   → Set Structure Decision based on project type
-3. Fill the Constitution Check section based on the content of the constitution document.
-4. Evaluate Constitution Check section below
-   → If violations exist: Document in Complexity Tracking
-   → If no justification possible: ERROR "Simplify approach first"
-   → Update Progress Tracking: Initial Constitution Check
+2. Summarize the vibe brief
+   → Extract mood adjectives, reference inspirations, and primary interaction goals
+3. Fill Technical Context
+   → Project type MUST be identified as "SvelteKit web"
+   → Capture SvelteKit 5 + TypeScript stack, dependencies, data/asset needs
+4. Constitution Check (see section below)
+   → Fail fast if any gate cannot be satisfied; record mitigation ideas
 5. Execute Phase 0 → research.md
-   → If NEEDS CLARIFICATION remain: ERROR "Resolve unknowns"
-6. Execute Phase 1 → contracts, data-model.md, quickstart.md, agent-specific template file (e.g., `CLAUDE.md` for Claude Code, `.github/copilot-instructions.md` for GitHub Copilot, `GEMINI.md` for Gemini CLI, `QWEN.md` for Qwen Code, or `AGENTS.md` for all other agents).
+   → Resolve open questions around mood fidelity, assets, or integrations
+6. Execute Phase 1 → contracts, data-model.md, quickstart.md, agent-specific template file (e.g., `CLAUDE.md` for Claude Code, `.github/copilot-instructions.md` for GitHub Copilot, `GEMINI.md` for Gemini CLI, `QWEN.md` for Qwen Code, or `AGENTS.md` for all other agents)
+   → Ensure interaction prototypes describe both UX flow and associated tests
 7. Re-evaluate Constitution Check section
-   → If new violations: Refactor design, return to Phase 1
-   → Update Progress Tracking: Post-Design Constitution Check
+   → If violations remain: refine approach before concluding plan
 8. Plan Phase 2 → Describe task generation approach (DO NOT create tasks.md)
 9. STOP - Ready for /tasks command
 ```
@@ -31,23 +29,37 @@
 - Phase 3-4: Implementation execution (manual or via tools)
 
 ## Summary
-[Extract from feature spec: primary requirement + technical approach from research]
+[Extract from feature spec: primary vibe objective + headline interaction]
 
 ## Technical Context
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: SvelteKit 5 (TypeScript) or [NEEDS CLARIFICATION]
+**Primary Dependencies**: [e.g., Svelte Motion, Three.js, Tone.js or NEEDS CLARIFICATION]
+**Storage / Data Sources**: [e.g., static JSON, Supabase, third-party API or N/A]
+**Testing**: Vitest (unit), Playwright (e2e), Storybook/screenshot tooling
+**Target Platform**: Modern browsers (desktop + mobile)
+**Project Type**: Web (SvelteKit)
+**Performance Goals**: <100 ms interactivity, <2.5 s LCP on 4G, 60 fps animations
+**Constraints**: [e.g., asset size caps, accessibility sensitivities or NEEDS CLARIFICATION]
+**Scale/Scope**: [expected page count, interaction complexity]
+
+## Principle Alignment Notes
+For each principle, explain the plan-level strategy and cite supporting documents.
+- **Principle I – Vibe-Led Experience**: [How the vibe mood, interactions, and success signals will be satisfied]
+- **Principle II – SvelteKit 5 + TypeScript**: [Stack decisions, shared components, routing pattern]
+- **Principle III – Fluid Performance**: [Performance risks, budgets, mitigation tasks/tests]
+- **Principle IV – Inclusive & Accessible Delight**: [Accessibility commitments, opt-outs, inclusive design steps]
+- **Principle V – Authentic Interactivity & Testing**: [Planned automated tests, prototypes, validation approach]
 
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- Principle I — Vibe Definition: Does the plan articulate the exact vibe mood, interactive anchors, and success signals?
+- Principle II — Stack Alignment: Are we using core SvelteKit 5 routing/load patterns with TypeScript and scoped assets?
+- Principle III — Performance Budget: Are mitigation strategies outlined for animations, data fetching, and asset weight?
+- Principle IV — Accessibility: Are keyboard flows, contrast choices, and sensory opt-outs addressed up front?
+- Principle V — Testing Discipline: Are Vitest + Playwright (and visual regression when needed) planned before implementation?
+
+If any answer is "No", document remediation steps before progressing.
 
 ## Project Structure
 
@@ -58,162 +70,133 @@ specs/[###-feature]/
 ├── research.md          # Phase 0 output (/plan command)
 ├── data-model.md        # Phase 1 output (/plan command)
 ├── quickstart.md        # Phase 1 output (/plan command)
-├── contracts/           # Phase 1 output (/plan command)
+├── vibe-brief.md        # Mood board & narrative summary
+├── contracts/           # Interaction contracts (Playwright scenarios, API stubs)
 └── tasks.md             # Phase 2 output (/tasks command - NOT created by /plan)
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
 ```
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
 src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+├── lib/                 # Shared UI primitives, design tokens, utilities
+│   ├── components/
+│   ├── theme/
+│   └── stores/
+├── routes/              # Feature pages (one directory per vibe)
+│   └── [vibe]/+page.svelte
+├── params/              # Custom route params (if needed)
+└── hooks.server.ts      # Global hooks for session, headers, etc.
 
 tests/
-├── contract/
-├── integration/
-└── unit/
+├── unit/                # Vitest suites for components/stores
+├── e2e/                 # Playwright specs exercising vibe flows
+└── visual/              # Screenshot or Storybook baselines
 
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+static/                  # Optimized media assets per vibe
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+## Execution Flow (main)
+```
+1. Load plan.md from feature directory
+   → If not found: ERROR "No implementation plan found"
+   → Extract: vibe mood, tech stack, asset requirements
+2. Load optional design documents:
+   → data-model.md: Define state machines or data contracts
+   → contracts/: Each Playwright spec → test-first tasks
+   → research.md: Capture experiential or technical spikes
+3. Generate tasks by category:
+   → Setup: theme tokens, routing scaffolds, asset pipelines
+   → Tests: Vitest components, Playwright flows, visual baselines
+   → Core: Svelte components, stores, animations, audio/GLSL modules
+   → Integration: API calls, third-party SDK wiring, performance tuning
+   → Polish: accessibility refinements, documentation, analytics events
+4. Apply task rules:
+   → Different files = mark [P] for parallel
+   → Same file = sequential (no [P])
+   → Tests before implementation (Vitest/Playwright)
+5. Number tasks sequentially (T001, T002...)
+6. Generate dependency graph
+7. Create parallel execution examples
+8. Validate task completeness:
+   → Every planned interaction has tests
+   → Performance and accessibility follow-ups captured
+   → Assets prepared or sourcing tasks listed
+9. Return: SUCCESS (tasks ready for execution)
+```
 
-## Phase 0: Outline & Research
-1. **Extract unknowns from Technical Context** above:
-   - For each NEEDS CLARIFICATION → research task
-   - For each dependency → best practices task
-   - For each integration → patterns task
+## Format: `[ID] [P?] Description`
+- **[P]**: Can run in parallel (different files, no dependencies)
+- Include exact file paths in descriptions
 
-2. **Generate and dispatch research agents**:
-   ```
-   For each unknown in Technical Context:
-     Task: "Research {unknown} for {feature context}"
-   For each technology choice:
-     Task: "Find best practices for {tech} in {domain}"
-   ```
+## Phase 3.1: Setup
+- [ ] T001 Scaffold vibe route directory in `src/routes/[vibe]/`
+- [ ] T002 Configure or extend design tokens in `src/lib/theme/`
+- [ ] T003 [P] Import or generate mood assets under `static/[vibe]/`
 
-3. **Consolidate findings** in `research.md` using format:
-   - Decision: [what was chosen]
-   - Rationale: [why chosen]
-   - Alternatives considered: [what else evaluated]
+## Phase 3.2: Tests First (TDD)
+**CRITICAL: Tests MUST be written and MUST FAIL before ANY implementation**
+- [ ] T004 [P] Vitest skeleton for core component in `tests/unit/[vibe].test.ts`
+- [ ] T005 Playwright contract for primary interaction in `tests/e2e/[vibe].spec.ts`
+- [ ] T006 [P] Visual baseline setup (Storybook/screenshot) in `tests/visual/[vibe].md`
 
-**Output**: research.md with all NEEDS CLARIFICATION resolved
+## Phase 3.3: Core Implementation (ONLY after tests are failing)
+- [ ] T007 Implement Svelte component structure in `src/routes/[vibe]/+page.svelte`
+- [ ] T008 Wire interaction state/store in `src/lib/stores/[vibe].ts`
+- [ ] T009 Animate transitions/motion sequences respecting performance budgets
+- [ ] T010 Integrate audio/video/shader assets with lazy loading guards
+- [ ] T011 Document vibe brief in `specs/[###-feature]/vibe-brief.md`
 
-## Phase 1: Design & Contracts
-*Prerequisites: research.md complete*
+## Phase 3.4: Integration
+- [ ] T012 Connect external APIs or data sources with caching in `src/routes/[vibe]/+page.server.ts`
+- [ ] T013 Run Lighthouse audit script and capture metrics
+- [ ] T014 Harden accessibility (ARIA, focus traps) in `src/lib/components/`
 
-1. **Extract entities from feature spec** → `data-model.md`:
-   - Entity name, fields, relationships
-   - Validation rules from requirements
-   - State transitions if applicable
+## Phase 3.5: Polish
+- [ ] T015 [P] Update README/landing copy referencing new vibe
+- [ ] T016 [P] Refresh Storybook entries or marketing assets
+- [ ] T017 Ensure analytics/telemetry hooks respect privacy expectations
+- [ ] T018 Final Playwright regression run and attach results to PR
 
-2. **Generate API contracts** from functional requirements:
-   - For each user action → endpoint
-   - Use standard REST/GraphQL patterns
-   - Output OpenAPI/GraphQL schema to `/contracts/`
+## Dependencies
+- Tests (T004-T006) MUST precede implementation (T007-T010)
+- T007 blocks T008-T010
+- T012 depends on stores/components being ready (T007-T010)
+- Audits and polish (T013-T018) happen after integration
 
-3. **Generate contract tests** from contracts:
-   - One test file per endpoint
-   - Assert request/response schemas
-   - Tests must fail (no implementation yet)
+## Parallel Example
+```
+# Launch these together after setup:
+Task: "Vitest skeleton for core component in tests/unit/[vibe].test.ts"
+Task: "Visual baseline setup in tests/visual/[vibe].md"
+```
 
-4. **Extract test scenarios** from user stories:
-   - Each story → integration test scenario
-   - Quickstart test = story validation steps
+## Notes
+- [P] tasks = different files, no dependencies
+- Reference vibe brief when naming components, animations, and assets
+- Commit after each task and link to metrics/screenshots when applicable
+- Avoid vague tasks; each entry must map to a specific file or artifact
 
-5. **Update agent file incrementally** (O(1) operation):
-   - Run `.specify/scripts/bash/update-agent-context.sh codex`
-     **IMPORTANT**: Execute it exactly as specified above. Do not add or remove any arguments.
-   - If exists: Add only NEW tech from current plan
-   - Preserve manual additions between markers
-   - Update recent changes (keep last 3)
-   - Keep under 150 lines for token efficiency
-   - Output to repository root
+## Task Generation Rules
+*Applied during main() execution*
 
-**Output**: data-model.md, /contracts/*, failing tests, quickstart.md, agent-specific file
+1. **From Contracts**:
+   - Each Playwright contract → matching implementation + regression task
+   - Each animation/audio cue → performance budget verification task
+2. **From Data Model**:
+   - Each store/state machine → creation and test tasks
+   - External data dependencies → integration and caching tasks
+3. **From Vibe Brief**:
+   - Mood anchors → component or asset creation tasks
+   - Accessibility promises → explicit testing tasks
+4. **Ordering**:
+   - Setup → Tests → Components/Stores → Integrations → Polish
+   - Dependencies block parallel execution
 
-## Phase 2: Task Planning Approach
-*This section describes what the /tasks command will do - DO NOT execute during /plan*
+## Validation Checklist
+*GATE: Checked by main() before returning*
 
-**Task Generation Strategy**:
-- Load `.specify/templates/tasks-template.md` as base
-- Generate tasks from Phase 1 design docs (contracts, data model, quickstart)
-- Each contract → contract test task [P]
-- Each entity → model creation task [P] 
-- Each user story → integration test task
-- Implementation tasks to make tests pass
-
-**Ordering Strategy**:
-- TDD order: Tests before implementation 
-- Dependency order: Models before services before UI
-- Mark [P] for parallel execution (independent files)
-
-**Estimated Output**: 25-30 numbered, ordered tasks in tasks.md
-
-**IMPORTANT**: This phase is executed by the /tasks command, NOT by /plan
-
-## Phase 3+: Future Implementation
-*These phases are beyond the scope of the /plan command*
-
-**Phase 3**: Task execution (/tasks command creates tasks.md)  
-**Phase 4**: Implementation (execute tasks.md following constitutional principles)  
-**Phase 5**: Validation (run tests, execute quickstart.md, performance validation)
-
-## Complexity Tracking
-*Fill ONLY if Constitution Check has violations that must be justified*
-
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
-
-
-## Progress Tracking
-*This checklist is updated during execution flow*
-
-**Phase Status**:
-- [ ] Phase 0: Research complete (/plan command)
-- [ ] Phase 1: Design complete (/plan command)
-- [ ] Phase 2: Task planning complete (/plan command - describe approach only)
-- [ ] Phase 3: Tasks generated (/tasks command)
-- [ ] Phase 4: Implementation complete
-- [ ] Phase 5: Validation passed
-
-**Gate Status**:
-- [ ] Initial Constitution Check: PASS
-- [ ] Post-Design Constitution Check: PASS
-- [ ] All NEEDS CLARIFICATION resolved
-- [ ] Complexity deviations documented
-
----
-*Based on Constitution v2.1.1 - See `/memory/constitution.md`*
+- [ ] All interactions have associated tests
+- [ ] Accessibility and performance mitigations captured
+- [ ] Parallel tasks target different files
+- [ ] Each task cites exact file path or artifact
+- [ ] Tests precede implementation tasks
