@@ -1,4 +1,4 @@
-# Vibe Atlas
+# Vibes
 
 A two-page SvelteKit 5 playground that leans into handcrafted CSS, fluid transitions, and accessibility-minded vibes. Navigate
 between the home scene and a "dummy" sandbox to see a 420 ms fly + scale animation that gracefully falls back when motion is
