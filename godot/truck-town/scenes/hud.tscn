@@ -1,0 +1,41 @@
+[gd_scene load_steps=2 format=3 uid="uid://hud"]
+
+[ext_resource type="Script" path="res://scripts/hud.gd" id="1_qhm20"]
+
+[node name="Hud" type="CanvasLayer"]
+script = ExtResource("1_qhm20")
+layer = 5
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 1
+anchor_right = 1.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 24.0
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Title" type="Label" parent="MarginContainer/VBoxContainer"]
+text = "Vibe Rally"
+label_settings/font_size = 32
+
+[node name="SpeedLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+name = "SpeedLabel"
+text = "Speed: 0km/h"
+label_settings/font_size = 24
+
+[node name="AlertLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+name = "AlertLabel"
+text = "Touch controls available — tap the on-screen pads to steer and drive."
+visible = false
+label_settings/font_size = 20
+label_settings/font_color = Color(1, 0.894118, 0.435294, 1)
