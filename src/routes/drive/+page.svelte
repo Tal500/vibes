@@ -1,6 +1,6 @@
 <script lang="ts">
   import { browser } from '$app/environment';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy, tick } from 'svelte';
 
   const gameUrl = '/vibe-rally/index.html';
 
@@ -10,10 +10,35 @@
   let loadError = false;
   let reducedMotion = false;
   let loadTimer: ReturnType<typeof setTimeout> | null = null;
+  let isFullWindow = false;
+  let previousOverflow: string | null = null;
 
   const focusGame = () => {
     iframeEl?.focus();
     iframeEl?.contentWindow?.focus?.();
+  };
+
+  const exitFullWindow = () => {
+    if (isFullWindow) {
+      isFullWindow = false;
+    }
+  };
+
+  const toggleFullWindow = async () => {
+    if (isFullWindow) {
+      exitFullWindow();
+      return;
+    }
+    isFullWindow = true;
+    await tick();
+    focusGame();
+  };
+
+  const handleWindowKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && isFullWindow) {
+      event.preventDefault();
+      exitFullWindow();
+    }
   };
 
   const handleLoad = () => {
@@ -28,6 +53,18 @@
   const handleError = () => {
     loadError = true;
   };
+
+  $: if (browser) {
+    if (isFullWindow) {
+      if (previousOverflow === null) {
+        previousOverflow = document.documentElement.style.overflow || '';
+      }
+      document.documentElement.style.overflow = 'hidden';
+    } else if (previousOverflow !== null) {
+      document.documentElement.style.overflow = previousOverflow;
+      previousOverflow = null;
+    }
+  }
 
   onMount(() => {
     if (!browser) {
@@ -60,7 +97,16 @@
       }
     };
   });
+
+  onDestroy(() => {
+    if (browser && previousOverflow !== null) {
+      document.documentElement.style.overflow = previousOverflow;
+      previousOverflow = null;
+    }
+  });
 </script>
+
+<svelte:window on:keydown={handleWindowKeydown} />
 
 <svelte:head>
   <title>Vibe Atlas — Vibe Rally</title>
@@ -71,7 +117,7 @@
 </svelte:head>
 
 <section class="drive" aria-labelledby="drive-title">
-  <div class="drive-intro">
+  <div class="drive-intro" aria-hidden={isFullWindow ? 'true' : undefined}>
     <p class="eyebrow">GODOT GARAGE</p>
     <h1 id="drive-title">Vibe Rally</h1>
     <p>
@@ -81,6 +127,15 @@
     <div class="drive-actions">
       <button class="button" type="button" on:click={focusGame}>
         Focus the game canvas
+      </button>
+      <button
+        class="button secondary full-window-toggle"
+        type="button"
+        aria-pressed={isFullWindow}
+        aria-controls="drive-full-window"
+        on:click={toggleFullWindow}
+      >
+        {isFullWindow ? 'Exit full window view' : 'Open full window view'}
       </button>
       <button
         class="button secondary"
@@ -111,7 +166,7 @@
   </div>
 
   <div class="drive-layout">
-    <aside class="controls" aria-label="Control reference">
+    <aside class="controls" aria-label="Control reference" aria-hidden={isFullWindow ? 'true' : undefined}>
       <h2>How to drive</h2>
       <ul>
         <li><span class="key">W</span> / <span class="key">↑</span> — Accelerate</li>
@@ -121,7 +176,7 @@
         <li><span class="key">Space</span> — Handbrake for snappier drifts</li>
         <li>Gamepad left stick steers, triggers move, and the bottom face button grabs the brake</li>
       </ul>
-      <p>Need more room? Use the fullscreen button inside the game HUD.</p>
+      <p>Need more room? Try the full window toggle above or the fullscreen button inside the game HUD.</p>
 
       <div class:touch-visible={showTouchHelp} class="touch-helper" aria-live="polite">
         <h3>Touch quickstart</h3>
@@ -134,7 +189,21 @@
       </div>
     </aside>
 
-    <div class="game-shell">
+    <div
+      id="drive-full-window"
+      class="game-shell"
+      class:full-window-active={isFullWindow}
+      role="region"
+      aria-label="Vibe Rally game canvas"
+    >
+      {#if isFullWindow}
+        <div class="full-window-bar" role="toolbar" aria-label="Full window controls">
+          <p>Full window mode</p>
+          <button class="button ghost full-window-dismiss" type="button" on:click={exitFullWindow}>
+            Exit full window view
+          </button>
+        </div>
+      {/if}
       <div class="game-frame">
         <iframe
           bind:this={iframeEl}
@@ -149,7 +218,7 @@
           on:error={handleError}
         ></iframe>
       </div>
-      <p class="game-fallback">
+      <p class="game-fallback" class:hidden={isFullWindow}>
         If the game never loads, <a href="/vibe-rally/index.html" target="_blank" rel="noopener">open it directly</a>.
       </p>
     </div>
@@ -201,6 +270,7 @@
     display: grid;
     gap: clamp(1.25rem, 2vw, 2rem);
     align-items: start;
+    position: relative;
   }
 
   .controls {
@@ -268,6 +338,18 @@
     gap: 0.75rem;
   }
 
+  .game-shell.full-window-active {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    padding: clamp(1rem, 3vw, 2.5rem);
+    background: radial-gradient(circle at top, rgba(104, 142, 255, 0.35), rgba(9, 10, 24, 0.96));
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 1rem;
+    align-content: stretch;
+  }
+
   .game-frame {
     position: relative;
     border-radius: 1.25rem;
@@ -284,6 +366,16 @@
     aspect-ratio: 16 / 9;
   }
 
+  .game-shell.full-window-active .game-frame {
+    height: 100%;
+    max-height: unset;
+    box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.6);
+  }
+
+  .game-shell.full-window-active .game-frame::before {
+    display: none;
+  }
+
   iframe {
     position: absolute;
     inset: 0;
@@ -294,6 +386,10 @@
     border-radius: inherit;
   }
 
+  .game-shell.full-window-active iframe {
+    position: static;
+  }
+
   .game-fallback {
     margin: 0;
     font-size: 0.9rem;
@@ -302,6 +398,45 @@
   .game-fallback a {
     color: inherit;
     text-decoration: underline;
+  }
+
+  .game-fallback.hidden {
+    display: none;
+  }
+
+  .full-window-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: rgba(7, 10, 26, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 0.85rem;
+    padding: 0.75rem 1rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .full-window-bar p {
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+  }
+
+  .button.ghost {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: inherit;
+  }
+
+  .button.ghost:hover,
+  .button.ghost:focus-visible {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .full-window-dismiss {
+    white-space: nowrap;
   }
 
   @media (min-width: 52rem) {
@@ -318,6 +453,10 @@
     .drive-actions {
       flex-direction: column;
       align-items: flex-start;
+    }
+
+    .game-shell.full-window-active {
+      padding: clamp(0.75rem, 4vw, 1.25rem);
     }
   }
 </style>

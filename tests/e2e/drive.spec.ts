@@ -41,4 +41,33 @@ test.describe('godot drive page', () => {
     await expect(toggle).toHaveAttribute('aria-pressed', 'false');
     await expect(helperHeading).toBeHidden();
   });
+
+  test('opens and exits the full window mode for the game', async ({ page }) => {
+    await page.goto('/drive');
+
+    const iframeLocator = page.locator('iframe[title="Vibe Rally Godot playground"]');
+    await expect(iframeLocator).toBeVisible();
+
+    const fullWindowToggle = page.getByRole('button', { name: /open full window view/i });
+    await expect(fullWindowToggle).toHaveAttribute('aria-pressed', 'false');
+
+    await fullWindowToggle.click();
+
+    const overlay = page.locator('#drive-full-window');
+    await expect(overlay).toHaveClass(/full-window-active/);
+
+    const exitButton = page.getByRole('button', { name: /exit full window view/i });
+    await expect(exitButton).toBeVisible();
+
+    const overflowState = await page.evaluate(() => document.documentElement.style.overflow);
+    expect(overflowState).toBe('hidden');
+
+    await exitButton.click();
+
+    await expect(fullWindowToggle).toHaveAttribute('aria-pressed', 'false');
+    await expect(overlay).not.toHaveClass(/full-window-active/);
+
+    const restoredOverflow = await page.evaluate(() => document.documentElement.style.overflow);
+    expect(restoredOverflow === '' || restoredOverflow === 'visible').toBe(true);
+  });
 });
