@@ -1,22 +1,24 @@
 # Playwright Contract · Drive Page
 
 ## Scenarios
-1. **Navigation + page shell**
-   - Start from home page.
-   - Click the "Drive" link in the top navigation.
-   - Expect URL `/drive` and nav item to have `aria-current="page"`.
-   - Confirm hero heading "Godot Truck Town" is visible.
+1. **Navigation + hero shell**
+   - Start on the home page.
+   - Use the top navigation to open the Drive page.
+   - Expect URL `/drive`, nav item with `aria-current="page"`, and hero heading "Vibe Rally".
 
 2. **Game iframe readiness**
-   - After navigation, wait for the Godot iframe to load its `<canvas>` element.
-   - Validate the iframe has descriptive `title` and `aria-label`.
-   - Ensure a focus helper button exists to send focus into the game frame.
+   - Wait for the Godot iframe to finish loading (canvas element present inside the frame).
+   - Assert the iframe exposes a descriptive `title` and `aria-label` and that the "Focus game" button exists for keyboard users.
 
-3. **Touch helper overlay**
-   - Toggle "Show touch controls" button.
-   - Confirm helper instructions become visible, containing gesture + virtual control hints.
-   - Toggle again to hide instructions.
+3. **Touch helper toggle**
+   - Click the "Show touch controls" button to reveal touch guidance.
+   - Validate touch hints mention steering, throttle, and brake gestures/buttons.
+   - Toggle again to hide the helper.
 
-4. **Fallback messaging**
-   - Simulate reduced motion preference or network failure? (Not covered via automation; check for presence of fallback notice element in DOM.)
+4. **Full-window mode**
+   - Activate the "Full window" button to expand the game overlay.
+   - Confirm document scrolling is disabled, the close affordance appears, and the fallback link is visually hidden.
+   - Press Escape (or click close) to exit and ensure body scrolling returns plus focus restores to the toggle button.
 
+5. **Failure fallback surface**
+   - Ensure the DOM includes a fallback link block that is only visible when the iframe fails (checked via attribute assertions, not by forcing failure in automation).

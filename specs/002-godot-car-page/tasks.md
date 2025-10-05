@@ -1,20 +1,21 @@
 # Task List · 002-godot-car-page
 
-## Setup
-- [X] T1 · Vendor Godot web export for the driving demo into `static/truck-town/` and verify asset manifest completeness.
-- [X] T2 · Capture implementation context by reading existing layout/navigation for integration constraints.
+## Setup & research
+- [X] T1 · Analyze existing navigation/layout code and confirm requirements for adding the Drive destination.
+- [X] T2 · Capture Godot Web export requirements (CLI download, template paths, hosting constraints) and document them in spec-kit files.
 
-## Tests
-- [X] T3 · Draft Playwright scenario outline for navigation, iframe readiness, and touch helper toggle.
+## Godot build pipeline
+- [X] T3 · Add the `godot/truck-town` source project and configure export presets targeting `static/vibe-rally/`.
+- [X] T4 · Author `scripts/build-godot.mjs` to download the CLI/templates, respect proxy env vars, and export during `npm run build`.
+- [X] T5 · Ensure the Web preset disables thread support (`variant/thread_support=false`) so the export runs without COOP/COEP headers.
 
-## Core
-- [X] T4 · Add navigation entry for the new driving page with active-state styling.
-- [X] T5 · Implement `/drive` page with responsive layout, iframe embed, accessibility affordances, and touch helper overlay.
+## SvelteKit experience
+- [X] T6 · Implement `/drive` route content with instructions, touch helper toggle, fallback messaging, and iframe embed.
+- [X] T7 · Add full-window overlay controls with focus/scroll management and Escape handling.
 
-## Integration
-- [X] T6 · Ensure Godot asset HTML works under SvelteKit (service worker scope, headers) and provide fallback messaging for unsupported browsers.
+## Testing & quality
+- [X] T8 · Cover navigation, loading, touch toggle, and full-window flows in `tests/e2e/drive.spec.ts`.
+- [X] T9 · Re-run `npm run build` and `npm run test:e2e` after thread-support updates to confirm regression-free behavior.
 
-## Polish
-- [X] T7 · Implement Playwright tests per outline and confirm they pass locally.
-- [X] T8 · Run project lint/build checks if applicable and document completion in summary.
-
+## Spec-kit maintenance
+- [X] T10 · Update plan, task list, and Playwright contract to reflect the current implementation (source-built Godot, full-window mode, thread-support change).

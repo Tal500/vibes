@@ -1,42 +1,39 @@
 # Implementation Plan · 002-godot-car-page
 
 ## Goal
-Create a new showcase page in the SvelteKit app that embeds a Godot-powered car driving experience, works well on desktop and touch devices, and is covered by end-to-end tests.
+Deliver a first-party driving showcase at `/drive` that builds the Godot "Vibe Rally" project from source during `npm run build`, serves the export from the SvelteKit app without cross-origin requirements, and exercises the experience with Playwright coverage (including the full-window presentation mode).
 
-## Tech stack & integration notes
-- **Frontend**: Existing SvelteKit 2 + TypeScript project using Svelte components and static assets served from `static/`.
-- **Game runtime**: Use an exported Godot Web build (HTML/JS/WASM/PCK) served from `static/` to keep everything same-origin so keyboard events flow correctly.
-- **Layout**: Reuse existing site chrome from `src/routes/+layout.svelte`; add a new navigation link that points to the new game route.
-- **Testing**: Extend Playwright suite (`tests/`) with scenarios that visit the new page, confirm the iframe/embedded canvas is ready, and simulate basic interactions such as focusing the canvas and toggling touch controls overlay.
+## Technical context & constraints
+- **SvelteKit app** – Existing navigation shell lives in `src/routes/+layout.svelte`; the Drive page implementation is in `src/routes/drive/+page.svelte` with local state for touch hints and full-window overlay management.
+- **Godot project** – Source files sit in `godot/truck-town/`. A Node script (`scripts/build-godot.mjs`) downloads the 4.2.2 CLI + export templates on demand and exports into `static/vibe-rally/` during the `prebuild` hook.
+- **Hosting limitations** – Deployments run on Vercel without configurable COOP/COEP headers, so the export must avoid requiring SharedArrayBuffer/cross-origin isolation. The export preset must remain single-threaded and decline the thread-support variant so browsers without COOP/COEP still load successfully.
+- **Testing** – End-to-end checks live under `tests/e2e/` and use Playwright. The suite runs against the production build output (`npm run test:e2e`).
 
-## File structure changes
+## File touchpoints
 ```
-static/
-  truck-town/…        # Godot export assets (HTML, JS, PCK, WASM, icons, manifest)
-src/routes/
-  drive/+page.svelte  # New route with responsive layout and instructions
-tests/
-  drive.spec.ts       # Playwright coverage for navigation + runtime smoke checks
+godot/truck-town/export_presets.cfg   # Web export settings (thread support toggle, paths, canvas policy)
+scripts/build-godot.mjs               # Build pipeline for fetching CLI/templates and exporting Web build
+src/routes/drive/+page.svelte         # UI, guidance content, touch helpers, and full-window button logic
+tests/e2e/drive.spec.ts               # Navigation, loading, and full-window Playwright assertions
+specs/002-godot-car-page/**           # Spec-kit plan, task list, and contracts kept current with implementation
 ```
 
-## Page behavior & UX
-- Provide a hero section with page title, description, and quick instruction summary.
-- Embed the Godot export inside a responsive container using `<iframe>` pointed at `/truck-town/index.html`.
-- Overlay an optional touch control helper UI (e.g., virtual buttons that explain gestures) and ensure keyboard users can focus the iframe via a dedicated button.
-- Provide fallback content when WebAssembly fails to load, prompting users to try a different browser/device.
-- Keep layout accessible: label the iframe, provide alt text, ensure color contrast, and respect reduced motion preference.
+## Key behaviors & UX requirements
+- Present the Drive hero section with instructions, touch helper toggle, and a "Focus game" button.
+- Embed the Godot export via `<iframe>` that points at `/vibe-rally/index.html`; manage loading state and hide fallback link when full-window mode is active.
+- Provide a full-window toggle that expands the iframe to fill the viewport, locks body scrolling, and restores focus/scroll when dismissed (via Escape or close button).
+- Offer device-specific hints: keyboard mapping for desktop, touch guidance for mobile, and fallback messaging if WASM fails.
 
-## Responsive strategy
-- Use CSS grid/flex to stack info and iframe on narrow screens, and place them side-by-side on large screens.
-- Maintain a 16:9 aspect ratio wrapper for the game iframe while allowing it to expand to available width.
-- Include toggles for "Show touch controls" that display overlay instructions for phone/tablet users.
+## Build & deployment requirements
+- `scripts/build-godot.mjs` must be idempotent, cache downloads under `.godot/`, respect proxy env vars, and clean/recreate `static/vibe-rally/` per export.
+- The Web preset must export with `variant/thread_support=false` (single-threaded) so COOP/COEP headers aren't required; keep `rendering/threads/thread_model=0`.
+- Generated artifacts (`static/vibe-rally/*`) stay untracked via `.gitignore`; the repo stores only Godot source plus build script.
 
 ## Testing strategy
-- Playwright test navigates from home nav link to the drive page and verifies the iframe has loaded the Godot canvas by waiting for the `<canvas>` within the iframe's content document.
-- Validate that the touch controls toggle reveals helper content and is keyboard accessible.
-- Ensure the nav highlight works for the new route.
+- Extend `tests/e2e/drive.spec.ts` to cover navigation, iframe readiness, touch toggle, and the full-window expand/collapse behavior.
+- Ensure Playwright waits for the Godot canvas frame to render before asserting; use feature-detection-friendly selectors rather than brittle animation timings.
+- Run `npm run build` and `npm run test:e2e` in CI/local verification.
 
-## Out of scope
-- Deep integration with the Godot game internals (no modifications to the PCK/WASM other than hosting).
-- Full gameplay automation (Playwright smoke-check only verifies rendering + UI helpers).
-
+## Documentation & spec-kit upkeep
+- Keep this plan, the task list, and the Playwright contract aligned with the shipped implementation so future updates have accurate context.
+- Note any host-specific constraints (cross-origin isolation, template caching) that motivated config choices within the plan/tasks files.

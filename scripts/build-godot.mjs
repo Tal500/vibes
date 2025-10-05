@@ -199,41 +199,6 @@ async function runGodotExport(godotBinary, templatesPath) {
   });
 }
 
-async function patchExportForSharedArrayBuffer() {
-  const htmlPath = resolve(exportDir, 'index.html');
-  if (!existsSync(htmlPath)) {
-    console.warn('[godot] export HTML missing; skipping cross-origin patch');
-    return;
-  }
-
-  const html = await fs.readFile(htmlPath, 'utf8');
-  if (html.includes('const missingAll = Engine.getMissingFeatures();')) {
-    return;
-  }
-
-  const newline = html.includes('\r\n') ? '\r\n' : '\n';
-  const sentinelRegex = /\tconst missing = Engine\.getMissingFeatures\(\);\r?\n/;
-  if (!sentinelRegex.test(html)) {
-    console.warn('[godot] unable to locate missing feature check for SharedArrayBuffer patch');
-    return;
-  }
-
-  const replacement = [
-    '\tconst missingAll = Engine.getMissingFeatures();',
-    '\tconst missing = missingAll.filter((feature) => {',
-    "\t\treturn !feature.startsWith('Cross Origin Isolation') && !feature.startsWith('SharedArrayBuffer');",
-    '\t});',
-    '\tif (missing.length !== missingAll.length) {',
-    "\t\tconsole.warn('Running without SharedArrayBuffer or cross-origin isolation; falling back to single-threaded Godot.');",
-    '\t}',
-    ''
-  ].join(newline);
-
-  const patched = html.replace(sentinelRegex, replacement);
-  await fs.writeFile(htmlPath, patched, 'utf8');
-  console.log('[godot] patched export to allow non-isolated browsers');
-}
-
 (async () => {
   if (!existsSync(projectDir)) {
     console.warn('[godot] no project directory found, skipping export');
@@ -244,7 +209,6 @@ async function patchExportForSharedArrayBuffer() {
   const binaryPath = await ensureGodotBinary();
   const templatesPath = await ensureTemplates();
   await runGodotExport(binaryPath, templatesPath);
-  await patchExportForSharedArrayBuffer();
   console.log('[godot] export complete');
 })().catch((error) => {
   console.error('[godot] export failed:', error);
