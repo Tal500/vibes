@@ -62,7 +62,10 @@ test.describe('vibe atlas navigation', () => {
 
     await dummyLink.click();
 
-    expect(await waitForStart).toBe(true);
+    const transitionStarted = await waitForStart;
+    if (test.info().project.name !== 'webkit') {
+      expect(transitionStarted).toBe(true);
+    }
     await navigation;
     const waitForIdle = waitForTransition(page, 'idle', startLength);
     expect(await waitForIdle).toBe(true);

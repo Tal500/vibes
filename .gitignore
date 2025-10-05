@@ -7,6 +7,8 @@ node_modules
 .wrangler
 /.svelte-kit
 /build
+/.godot/
+static/vibe-rally/
 playwright-report
 test-results
 

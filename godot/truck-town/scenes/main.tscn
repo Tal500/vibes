@@ -1,0 +1,61 @@
+[gd_scene load_steps=7 format=3 uid="uid://main"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_vb0a6"]
+[ext_resource type="PackedScene" path="res://scenes/car.tscn" id="2_v8vfv"]
+[ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="3_yfd0m"]
+[ext_resource type="PackedScene" path="res://scenes/touch_controls.tscn" id="4_6d3qw"]
+
+[sub_resource type="Gradient" id="1"]
+colors = PackedColorArray(0.0705882, 0.0862745, 0.141176, 1, 0.109804, 0.12549, 0.196078, 1)
+offsets = PackedFloat32Array(0, 1)
+
+[sub_resource type="GradientTexture2D" id="2"]
+gradient = SubResource("1")
+width = 2048
+height = 2048
+
+[sub_resource type="Gradient" id="3"]
+colors = PackedColorArray(0.188235, 0.211765, 0.356863, 1, 0.0784314, 0.101961, 0.223529, 1)
+offsets = PackedFloat32Array(0, 1)
+
+[sub_resource type="GradientTexture2D" id="4"]
+gradient = SubResource("3")
+width = 2048
+height = 2048
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_vb0a6")
+position = Vector2(0, 0)
+
+[node name="Ground" type="Sprite2D" parent="."]
+texture = SubResource("2")
+centered = false
+region_enabled = false
+
+[node name="Track" type="Sprite2D" parent="."]
+texture = SubResource("4")
+centered = false
+scale = Vector2(0.7, 0.7)
+position = Vector2(-320, -320)
+
+[node name="Guide" type="Line2D" parent="."]
+default_color = Color(0.317647, 0.952941, 0.996078, 0.588235)
+points = PackedVector2Array(-440, -60, -200, -200, 120, -220, 360, -40, 400, 220, 140, 300, -240, 240, -420, 40, -440, -60)
+width = 12.0
+closed = true
+
+[node name="Car" parent="." instance=ExtResource("2_v8vfv")]
+position = Vector2(-120, -40)
+rotation = -0.05
+
+[node name="Camera2D" type="Camera2D" parent="Car"]
+position = Vector2(0, 0)
+zoom = Vector2(0.9, 0.9)
+limit_smoothed = true
+smoothing_enabled = true
+smoothing_speed = 5.0
+current = true
+
+[node name="Hud" parent="." instance=ExtResource("3_yfd0m")]
+
+[node name="TouchControls" parent="." instance=ExtResource("4_6d3qw")]

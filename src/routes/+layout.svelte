@@ -173,14 +173,25 @@
       class={navClass($page.url.pathname === '/')}
       data-sveltekit-prefetch
       on:click={(event) => navigate(event, '/')}
+      aria-current={$page.url.pathname === '/' ? 'page' : undefined}
     >Home</a>
     <a
       href="/dummy"
       class={navClass($page.url.pathname.startsWith('/dummy'))}
       data-sveltekit-prefetch
       on:click={(event) => navigate(event, '/dummy')}
+      aria-current={$page.url.pathname.startsWith('/dummy') ? 'page' : undefined}
     >
       Dummy vibe
+    </a>
+    <a
+      href="/drive"
+      class={navClass($page.url.pathname.startsWith('/drive'))}
+      data-sveltekit-prefetch
+      on:click={(event) => navigate(event, '/drive')}
+      aria-current={$page.url.pathname.startsWith('/drive') ? 'page' : undefined}
+    >
+      Drive
     </a>
   </nav>
 </header>
